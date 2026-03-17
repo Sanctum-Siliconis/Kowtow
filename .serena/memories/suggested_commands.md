@@ -1,0 +1,7 @@
+- Install editable package: `python3 -m pip install -e .`
+- Bootstrap install script: `./install.sh`
+- Run CLI entrypoint: `kowtow <subcommand>`
+- Common CLI actions: `kowtow init`, `kowtow purify --locale <zh-cn|en|ja|ko> <prompt>`, `kowtow json-prompt --locale <locale> <prompt>`
+- Run MCP server: `kowtow-mcp`
+- Run tests (dev dependency): `pytest`
+- Run lint/format checks likely used here: `ruff check .`

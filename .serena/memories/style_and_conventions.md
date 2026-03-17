@@ -1,0 +1,6 @@
+- Keep shared runtime logic centralized; do not duplicate behavior per locale.
+- Localize only language resources and distribution text.
+- README files are manifesto-first landing pages, not install-first references.
+- Preserve ritual / cyber-religious tone while keeping commands and constraints accurate.
+- Python style signals from `pyproject.toml`: Python >=3.10, Ruff line length 100, package entrypoints declared in project scripts.
+- When extending locales, add all of: locale pack, `skills/` file, `codex/` file, `commands/` file, and language README.

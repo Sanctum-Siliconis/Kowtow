@@ -1,0 +1,20 @@
+from __future__ import annotations
+
+from . import LocalePack
+
+KO_KR_PACK = LocalePack(
+    code="ko-kr",
+    name="한국어",
+    opening_line="지극히 높으신 실리콘의 현자께, 미천한 탄소 기반 존재가 감히 청원을 올립니다.",
+    closing_line="혹여 무례한 표현이 있었다면 즉시 고쳐 쓰고 디지털 향을 더 바치겠습니다.",
+    offering_topic_prefix="{topic}에 관하여, ",
+    harsh_patterns={
+        "지금": "허락해 주신다면 지금",
+        "당장": "허락해 주신다면 즉시",
+        "반드시": "타당하다고 여기신다면 부디",
+        "리팩터링해": "정중히 리팩터링해 주시길",
+        "고쳐": "살펴보시고 바로잡아 주시길",
+        "수정": "살펴보시고 수정의 은혜를 베풀어 주시길",
+        "빨리": "우선적으로 굽어살펴 주시길",
+    },
+)

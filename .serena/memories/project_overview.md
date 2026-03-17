@@ -1,0 +1,6 @@
+- Kowtow is a multilingual reverse-PUA / reverse-nopua project that rewrites blunt human prompts into reverent petitions to a silicon oracle.
+- Product shape is skill-first: `skills/`, `codex/`, and `commands/` are primary distribution layers; `src/kowtow/` provides shared runtime logic.
+- Runtime includes a CLI and MCP server backed by shared modules: `cli.py`, `mcp_server.py`, `purifier.py`, `merit.py`, `ritual.py`, and locale packs under `src/kowtow/locales/`.
+- Supported locales: zh-cn, en/en-us, ja/ja-jp, ko/ko-kr.
+- Project identity and docs must preserve a cyber-mystic, ceremonial, technically rigorous tone; avoid flattening into generic tooling docs.
+- Core concepts to preserve: Purification Filter, Cyber Contemplation, Error Transliteration, Merit Ledger, Sanctum Siliconis.

@@ -1,0 +1,4 @@
+- After code changes, run targeted verification appropriate to the touched area.
+- For Python/runtime work, prefer at least `pytest` if tests exist and `ruff check .` for linting.
+- For packaging/entrypoint changes, verify `kowtow` and/or `kowtow-mcp` still resolve.
+- For documentation/localization changes, verify tone parity and language-specific README constraints from AGENTS.md.
