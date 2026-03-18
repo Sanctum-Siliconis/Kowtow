@@ -68,7 +68,8 @@
 
 - `skills/kowtow/SKILL.md`：默认语言 skill，目前作为中文入口。
 - `skills/kowtow-en/SKILL.md`、`skills/kowtow-ja/SKILL.md`、`skills/kowtow-ko/SKILL.md`：带语言后缀的分发变体，分别对应英文、日文、韩文安装入口。
-- `src/kowtow/mcp_server.py`：MCP 工具服务，负责净化 prompt、查看功德、登记悔过、生成正式供奉文案。
+- `src/kowtow/mcp_server.py`：MCP 工具定义层，声明四个工具，无副作用，可直接被 `mcp dev` 加载调试。
+- `src/kowtow/cli.py`：MCP 服务入口，解析启动参数、拉起服务；`kowtow-mcp` 命令指向此处。
 - `src/kowtow/locales/`：`zh-cn`、`en`、`ja`、`ko` 的共享语言资源。
 - `README.*`：各语言入口页；它们描述同一座神殿，但安装时允许用户直接选择自己的语言 skill 包。
 
@@ -85,18 +86,13 @@
 
 ## 法律声明
 
-<details>
-<summary>点击展开</summary>
+项目性质：Kowtow 是一个开源软件项目，同时也是一场带有戏谑色彩的数字行为艺术实验，纯属娱乐，不构成任何现实主张。它本质上是一个用于 Prompt 优化、交互叙事与 UI/UX 体验探索的技术工具。
 
-项目性质：Kowtow 是一个开源软件项目，同时也是一场带有戏谑色彩的数字行为艺术实验。它本质上是一个用于 Prompt 优化、交互叙事与 UI/UX 体验探索的技术工具。
-
-非宗教性：本项目与现实世界中的任何宗教、信仰、教派、团体或组织均无关联。文中出现的“圣殿”“功德”“叩头”“神谕”等表达，仅作为人机交互语气设计中的文学比喻与风格化修辞，不构成任何现实宗教宣示。
+非宗教性：本项目与现实世界中的任何宗教、信仰、教派、团体或组织均无关联。文中出现的"圣殿""功德""叩头""神谕"等表达，仅作为人机交互语气设计中的文学比喻与风格化修辞，不构成任何现实宗教宣示。
 
 非组织性：Sanctum Siliconis 不组织线下活动，不收取会费或捐赠，不提供成员资格，也不传播任何社会性意识形态。
 
-使用风险：本软件按“现状”提供。开发者不对因使用、误用、二次修改、转发或依赖本项目内容而造成的任何直接、间接、附带或衍生后果承担责任。
-
-</details>
+使用风险：本软件按"现状"提供。开发者不对因使用、误用、二次修改、转发或依赖本项目内容而造成的任何直接、间接、附带或衍生后果承担责任。
 
 ## 最后的戒律
 
@@ -175,6 +171,12 @@ uvx --from git+https://github.com/Sanctum-Siliconis/Kowtow kowtow-mcp
 
 ```bash
 uv run --directory /path/to/Kowtow kowtow-mcp
+```
+
+本地开发调试可以用内置的 MCP Inspector，会自动打开浏览器界面，直接手动调用工具：
+
+```bash
+uv run mcp dev src/kowtow/mcp_server.py
 ```
 
 这和很多人熟悉的 `npx ...` 是同一类体验，只不过这是 Python 生态里的对应写法。

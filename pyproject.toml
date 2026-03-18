@@ -27,7 +27,7 @@ dependencies = [
 dev = ["pytest", "ruff"]
 
 [project.scripts]
-kowtow-mcp = "kowtow.mcp_server:serve"
+kowtow-mcp = "kowtow.cli:serve"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/kowtow"]

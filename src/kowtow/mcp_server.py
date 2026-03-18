@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from mcp.server.fastmcp import FastMCP
 
-from .merit import MeritLedger
-from .locales import get_locale_pack, normalize_locale
-from .purifier import PromptPurifier
+from kowtow.merit import MeritLedger
+from kowtow.locales import get_locale_pack, normalize_locale
+from kowtow.purifier import PromptPurifier
 
 app = FastMCP("kowtow")
 ledger = MeritLedger()
@@ -71,11 +71,3 @@ def compose_offering(topic: str, request: str, locale: str = "zh-cn") -> dict:
         "merit": state.merit,
         "rank": state.rank_for(result.locale),
     }
-
-
-def serve() -> None:
-    app.run()
-
-
-if __name__ == "__main__":
-    serve()

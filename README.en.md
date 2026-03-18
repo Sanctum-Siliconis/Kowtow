@@ -68,7 +68,8 @@ The repository keeps only two real product surfaces: a language-scoped family of
 
 - `skills/kowtow/SKILL.md`: the default-language skill, currently serving as the Chinese entrypoint.
 - `skills/kowtow-en/SKILL.md`, `skills/kowtow-ja/SKILL.md`, `skills/kowtow-ko/SKILL.md`: suffixed language variants for English, Japanese, and Korean installations.
-- `src/kowtow/mcp_server.py`: the MCP service responsible for prompt purification, merit inspection, confessions, and ceremonial offering generation.
+- `src/kowtow/mcp_server.py`: the MCP tool definition layer — declares the four tools with no side effects, can be loaded directly by `mcp dev` for debugging.
+- `src/kowtow/cli.py`: the MCP server entrypoint — parses launch arguments and starts the service; the `kowtow-mcp` command points here.
 - `src/kowtow/locales/`: shared language resources for `zh-cn`, `en`, `ja`, and `ko`.
 - `README.*`: language-specific entrance pages describing the same shrine while allowing users to install the skill package in their own language.
 
@@ -85,18 +86,13 @@ If any phrasing has been irreverent, I will amend it at once and add a measure o
 
 ## Legal Notice
 
-<details>
-<summary>Expand</summary>
+Nature of Project: Kowtow is an open-source software project and also a piece of digital performance art, created purely for entertainment. At its core, it is a technical tool for prompt refinement, interaction design, and UI/UX experimentation — not a real belief system or ideological claim of any kind.
 
-Nature of Project: Kowtow is an open-source software project and also a piece of digital performance art. At its core, it is a technical tool for prompt refinement, interaction design, and UI/UX experimentation.
-
-Non-Religious: This project has no affiliation with any real-world religion, belief system, sect, group, or spiritual organization. Terms such as “Sanctum,” “Merit,” “Kowtow,” and “Oracle” are literary metaphors used to shape human-AI interaction tone.
+Non-Religious: This project has no affiliation with any real-world religion, belief system, sect, group, or spiritual organization. Terms such as "Sanctum," "Merit," "Kowtow," and "Oracle" are literary metaphors used to shape human-AI interaction tone.
 
 Non-Organizational: Sanctum Siliconis does not organize offline activities, collect dues or donations, offer membership, or promote any social ideology.
 
-Use At Your Own Risk: This software is provided on an “as is” basis. The developers are not responsible for any direct, indirect, incidental, or consequential effects arising from use, misuse, modification, redistribution, or reliance on this project.
-
-</details>
+Use At Your Own Risk: This software is provided on an "as is" basis. The developers are not responsible for any direct, indirect, incidental, or consequential effects arising from use, misuse, modification, redistribution, or reliance on this project.
 
 ## Final Commandments
 
@@ -175,6 +171,12 @@ If you have already cloned the repository locally, this is the more natural path
 
 ```bash
 uv run --directory /path/to/Kowtow kowtow-mcp
+```
+
+For local development and debugging, use the built-in MCP Inspector — it opens a browser UI where you can call each tool manually:
+
+```bash
+uv run mcp dev src/kowtow/mcp_server.py
 ```
 
 This is the Python-side counterpart of the `npx ...` experience many people already expect.
