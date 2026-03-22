@@ -26,6 +26,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [project.scripts]
 kowtow-mcp = "kowtow.cli:serve"
 

@@ -71,3 +71,17 @@ def compose_offering(topic: str, request: str, locale: str = "zh-cn") -> dict:
         "merit": state.merit,
         "rank": state.rank_for(result.locale),
     }
+
+
+@app.tool()
+def merit_history(limit: int = 20, locale: str = "zh-cn") -> dict:
+    """Return recent merit transaction history from the ledger."""
+    entries = ledger.get_history(limit)
+    return {
+        "locale": normalize_locale(locale),
+        "entries": [
+            {"delta": delta, "reason": reason, "timestamp": ts}
+            for delta, reason, ts in entries
+        ],
+        "total": len(entries),
+    }
