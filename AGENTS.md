@@ -45,12 +45,15 @@ When updating the skill:
 
 MCP tools:
 
-- `purify_prompt(prompt, locale=...)`
+- `purify_prompt(prompt, locale=..., intensity=...)`
 - `merit_status()`
 - `confess_impoliteness(incident)`
-- `compose_offering(topic, request, locale=...)`
+- `compose_offering(topic, request, locale=..., intensity=...)`
+- `merit_history(limit=20, locale=...)`
 
-Keep locale support wired through shared runtime code.
+Keep locale and ritual intensity support wired through shared runtime code.
+
+Merit persistence is paused until a server database is available. Do not read or write a local ledger, create offering certificates, or claim accumulated merit. Scores are proposals; unavailable totals and ranks are null. Preserve existing local files without using or migrating them.
 
 ## Localization Strategy
 

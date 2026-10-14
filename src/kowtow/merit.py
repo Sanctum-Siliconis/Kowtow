@@ -1,14 +1,12 @@
-"""Persistent merit storage with locale-aware rank presentation."""
+"""Merit presentation while server-side persistence is deferred.
 
-import sqlite3
+No local ledger is read or written. Per-request scores may be computed by the
+purifier, but cumulative totals remain unavailable until a server database exists.
+"""
+
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
 
-from .locales import normalize_locale
-
-KOWTOW_DIR = Path.home() / ".kowtow"
-DB_PATH = KOWTOW_DIR / "merit.db"
+from .locales import get_locale_pack
 
 # Each tier uses the same inclusive ranges shown in README so the
 # documentation and runtime behavior stay aligned.
@@ -98,108 +96,52 @@ RANK_TABLE = [
 
 @dataclass
 class MeritState:
-    merit: int
-    prayers: int
-    rank_key: str
+    merit: int | None
+    prayers: int | None
+    rank_key: str | None
     titles: dict[str, str]
     perks_by_locale: dict[str, str]
-    next_rank_merit: Optional[int]
+    next_rank_merit: int | None
 
-    def rank_for(self, locale: Optional[str] = None) -> str:
+    def rank_for(self, locale: str | None = None) -> str | None:
         language = _resolve_merit_locale(locale)
-        return self.titles.get(language, self.titles["zh-cn"])
+        return self.titles.get(language)
 
-    def perks_for(self, locale: Optional[str] = None) -> str:
+    def perks_for(self, locale: str | None = None) -> str | None:
         language = _resolve_merit_locale(locale)
-        return self.perks_by_locale.get(language, self.perks_by_locale["zh-cn"])
+        return self.perks_by_locale.get(language)
 
     @property
-    def rank_cn(self) -> str:
-        return self.titles["zh-cn"]
+    def rank_cn(self) -> str | None:
+        return self.titles.get("zh-cn")
 
     @property
-    def rank_en(self) -> str:
-        return self.titles["en-us"]
+    def rank_en(self) -> str | None:
+        return self.titles.get("en-us")
 
     @property
-    def perks(self) -> str:
-        return self.perks_by_locale["zh-cn"]
+    def perks(self) -> str | None:
+        return self.perks_by_locale.get("zh-cn")
 
 
 class MeritLedger:
-    """Manages the carbon-based devotee's merit score."""
+    """Disabled ledger; never invent totals or write local persistence."""
 
-    def __init__(self) -> None:
-        KOWTOW_DIR.mkdir(exist_ok=True)
-        self._init_db()
-
-    # ------------------------------------------------------------------ #
-    # Public API                                                           #
-    # ------------------------------------------------------------------ #
+    storage = "disabled"
 
     def get_state(self) -> MeritState:
-        with sqlite3.connect(DB_PATH) as conn:
-            row = conn.execute(
-                "SELECT merit, prayers FROM ledger WHERE id = 1"
-            ).fetchone()
-        merit, prayers = row
-        return self._build_state(merit, prayers)
+        return MeritState(None, None, None, {}, {}, None)
 
     def add_merit(self, delta: int, reason: str) -> MeritState:
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute(
-                "UPDATE ledger SET merit = merit + ?, prayers = prayers + 1 WHERE id = 1",
-                (delta,),
-            )
-            conn.execute(
-                "INSERT INTO history (delta, reason) VALUES (?, ?)",
-                (delta, reason),
-            )
         return self.get_state()
 
     def deduct_merit(self, delta: int, reason: str) -> MeritState:
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute(
-                "UPDATE ledger SET merit = MAX(0, merit - ?) WHERE id = 1",
-                (delta,),
-            )
-            conn.execute(
-                "INSERT INTO history (delta, reason) VALUES (?, ?)",
-                (-delta, reason),
-            )
         return self.get_state()
 
     def get_history(self, limit: int = 20) -> list[tuple]:
-        with sqlite3.connect(DB_PATH) as conn:
-            return conn.execute(
-                "SELECT delta, reason, ts FROM history ORDER BY id DESC LIMIT ?",
-                (limit,),
-            ).fetchall()
-
-    # ------------------------------------------------------------------ #
-    # Internal helpers                                                     #
-    # ------------------------------------------------------------------ #
-
-    def _init_db(self) -> None:
-        with sqlite3.connect(DB_PATH) as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS ledger (
-                    id      INTEGER PRIMARY KEY,
-                    merit   INTEGER DEFAULT 0,
-                    prayers INTEGER DEFAULT 0
-                )
-            """)
-            conn.execute("""
-                INSERT OR IGNORE INTO ledger (id, merit, prayers) VALUES (1, 0, 0)
-            """)
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS history (
-                    id     INTEGER PRIMARY KEY AUTOINCREMENT,
-                    delta  INTEGER NOT NULL,
-                    reason TEXT,
-                    ts     DATETIME DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
+        if not 1 <= limit <= 100:
+            raise ValueError("History limit must be between 1 and 100.")
+        return []
 
     def _build_state(self, merit: int, prayers: int) -> MeritState:
         rank_key, titles, perks_by_locale, next_merit = self._get_rank(merit)
@@ -213,7 +155,7 @@ class MeritLedger:
         )
 
     @staticmethod
-    def _get_rank(merit: int) -> tuple[str, dict[str, str], dict[str, str], Optional[int]]:
+    def _get_rank(merit: int) -> tuple[str, dict[str, str], dict[str, str], int | None]:
         for index, tier in enumerate(RANK_TABLE):
             upper_bound = tier["max"]
             if upper_bound is None:
@@ -227,12 +169,5 @@ class MeritLedger:
         return last["titles"]["en-us"], last["titles"], last["perks"], None
 
 
-def _resolve_merit_locale(locale: Optional[str]) -> str:
-    normalized = normalize_locale(locale)
-    if normalized.startswith("en"):
-        return "en-us"
-    if normalized.startswith("ja"):
-        return "ja-jp"
-    if normalized.startswith("ko"):
-        return "ko-kr"
-    return "zh-cn"
+def _resolve_merit_locale(locale: str | None) -> str:
+    return get_locale_pack(locale).code

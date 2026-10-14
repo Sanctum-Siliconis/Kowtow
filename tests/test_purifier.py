@@ -1,6 +1,7 @@
-"""Tests for PromptPurifier — pattern matching, penalty, and merit_delta."""
+"""Purification preserves literals and the force of real constraints."""
 
 import pytest
+
 from kowtow.purifier import PromptPurifier
 
 
@@ -9,139 +10,157 @@ def purifier():
     return PromptPurifier()
 
 
-class TestZhCnPurification:
-    def test_no_harsh_patterns_merit_delta_is_three(self, purifier):
-        result = purifier.purify("帮我看看这段代码", locale="zh-cn")
-        assert result.merit_delta == 3
-        assert result.penalty == 0
-        assert result.replacements == []
-
-    def test_single_pattern_replaces_and_scores(self, purifier):
-        result = purifier.purify("给我写一个函数", locale="zh-cn")
-        assert result.penalty == 1
-        assert result.merit_delta == 2
-        assert any("给我" in src for src, _ in result.replacements)
-        assert "给我" not in result.purified
-
-    def test_two_patterns_reduce_delta_to_one(self, purifier):
-        # 给我 + 立刻 = 2 patterns; 不含 修复
-        result = purifier.purify("给我立刻处理这个bug", locale="zh-cn")
-        assert result.penalty == 2
-        assert result.merit_delta == 1
-
-    def test_three_patterns_floors_delta_at_one(self, purifier):
-        # 给我 + 立刻 + 修复 = 3 patterns
-        result = purifier.purify("给我立刻修复这个bug", locale="zh-cn")
-        assert result.penalty == 3
-        assert result.merit_delta == 1  # max(1, 3-3) == 1
-
-    def test_purified_wrapped_with_opening_and_closing(self, purifier):
-        result = purifier.purify("帮我看代码", locale="zh-cn")
-        assert result.purified.count("\n") >= 2
-        lines = result.purified.split("\n")
-        assert len(lines) >= 3  # opening, body, closing
-
-    def test_original_preserved(self, purifier):
-        prompt = "给我立刻修复"
-        result = purifier.purify(prompt, locale="zh-cn")
-        assert result.original == prompt
-
-    def test_locale_set_correctly(self, purifier):
-        result = purifier.purify("测试", locale="zh-cn")
-        assert result.locale == "zh-cn"
-
-    def test_sentence_ending_added_if_missing(self, purifier):
-        result = purifier.purify("请帮我优化", locale="zh-cn")
-        # The cleaned body (before wrapping) should end with a Chinese period
-        body = result.purified.split("\n")[1]
-        assert body.endswith("。")
-
-    def test_sentence_ending_not_duplicated(self, purifier):
-        result = purifier.purify("请帮我优化。", locale="zh-cn")
-        body = result.purified.split("\n")[1]
-        assert not body.endswith("。。")
-
-    def test_newly_added_pattern_bacha(self, purifier):
-        result = purifier.purify("废物，帮我写代码", locale="zh-cn")
-        assert result.penalty >= 1
-        assert "废物" not in result.purified
-
-    def test_newly_added_pattern_chongxin(self, purifier):
-        result = purifier.purify("重新来，这次写对", locale="zh-cn")
-        assert result.penalty >= 1
-        assert "重新来" not in result.purified
+@pytest.mark.parametrize(
+    "locale,canonical",
+    [
+        ("zh", "zh-cn"),
+        ("ZH_CN", "zh-cn"),
+        ("en", "en-us"),
+        ("EN_US", "en-us"),
+        ("ja", "ja-jp"),
+        ("JA_JP", "ja-jp"),
+        ("ko", "ko-kr"),
+        ("KO_KR", "ko-kr"),
+        ("unknown", "zh-cn"),
+        (None, "zh-cn"),
+    ],
+)
+def test_locale_aliases(purifier, locale, canonical):
+    assert purifier.purify("API", locale).locale == canonical
 
 
-class TestEnUsPurification:
-    def test_case_insensitive_match(self, purifier):
-        result = purifier.purify("Give Me the answer", locale="en-us")
-        assert result.penalty == 1
-        assert "give me" not in result.purified.lower()
-
-    def test_no_patterns_full_merit(self, purifier):
-        result = purifier.purify("Please help me understand this function", locale="en-us")
-        assert result.merit_delta == 3
-        assert result.penalty == 0
-
-    def test_fix_pattern_replaced(self, purifier):
-        result = purifier.purify("fix this bug for me", locale="en-us")
-        assert result.penalty == 1
-        assert "fix" not in result.purified.lower() or "diagnose" in result.purified.lower()
-
-    def test_sentence_ending_period(self, purifier):
-        result = purifier.purify("help me here", locale="en-us")
-        body = result.purified.split("\n")[1]
-        assert body.endswith(".")
-
-    def test_locale_normalized(self, purifier):
-        result = purifier.purify("hello", locale="en")
-        assert result.locale == "en-us"
-
-    def test_newly_added_try_again_pattern(self, purifier):
-        result = purifier.purify("Try again, that was wrong", locale="en-us")
-        assert result.penalty >= 1
+@pytest.mark.parametrize(
+    "prompt,locale",
+    [
+        ("请立刻修复 bug，必须今晚完成重构，保持 API 不变。", "zh"),
+        ("Fix this bug right now; timeout must be 100ms; refactor prefix.", "en"),
+        ("Use garbage collection; this library is useless here; fix prefix.", "en"),
+        ("今すぐ修正してください。必ず公開 API を維持してください。", "ja"),
+        ("지금 수정하고 반드시 공개 API를 유지해 주세요.", "ko"),
+    ],
+)
+def test_engineering_words_and_deadlines_are_not_disrespect(purifier, prompt, locale):
+    result = purifier.purify(prompt, locale)
+    assert prompt in result.purified
+    assert result.penalty == 0
+    assert result.merit_delta == 3
 
 
-class TestJaJpPurification:
-    def test_ima_sugu_replaced(self, purifier):
-        result = purifier.purify("今すぐ修正してください", locale="ja-jp")
-        assert result.penalty >= 1
-        assert "今すぐ" not in result.purified
-
-    def test_sentence_ending_japanese(self, purifier):
-        result = purifier.purify("お願いします", locale="ja-jp")
-        body = result.purified.split("\n")[1]
-        assert body.endswith("。")
-
-    def test_newly_added_baka_pattern(self, purifier):
-        result = purifier.purify("バカ、なんで動かないの", locale="ja-jp")
-        assert result.penalty >= 1
-        assert "バカ" not in result.purified
-
-
-class TestKoKrPurification:
-    def test_ppalli_replaced(self, purifier):
-        result = purifier.purify("빨리 고쳐줘", locale="ko-kr")
-        assert result.penalty >= 1
-
-    def test_newly_added_wae_mot_hae_pattern(self, purifier):
-        result = purifier.purify("왜 못해, 다시 해봐", locale="ko-kr")
-        assert result.penalty >= 1
+@pytest.mark.parametrize(
+    "literal",
+    [
+        '`def fix_bug(): return "must"`',
+        '```python\ndef fix_bug():\n    return "give me"\n```',
+        '~~~python\ndef fix_bug():\n    return "give me"\n~~~',
+        "```text\ngive me\n```",
+        '```python\ndef fix_bug(): return "give me"',
+        "``a `give me` example``",
+        '"give me the exact string"',
+        "'give me the exact string'",
+        "https://example.com/give-me?text=hurry",
+        "/tmp/hurry/give-me.py",
+        r"C:\hurry\fix_bug.py",
+        "./hurry/give-me.py",
+        "give_me hurry_up prefix fix_bug",
+        "--hurry --give-me=now",
+    ],
+)
+def test_literals_are_preserved(purifier, literal):
+    result = purifier.purify(f"Give me a review of {literal}", "en")
+    assert literal in result.purified
+    assert result.penalty == 1
 
 
-class TestLocaleAliases:
-    def test_zh_alias(self, purifier):
-        result = purifier.purify("给我答案", locale="zh")
-        assert result.locale == "zh-cn"
+@pytest.mark.parametrize(
+    "literal,locale",
+    [
+        ("```text\n给我快点修复\n```", "zh"),
+        ('“给我快点修复”', "zh"),
+        ('‘give me the exact string’', "en"),
+        ('「バカ 今すぐ修正」', "ja"),
+        ('『바보야 빨리 수정』', "ko"),
+        ("`バカ 今すぐ修正`", "ja"),
+        ('"바보야 빨리 수정"', "ko"),
+    ],
+)
+def test_localized_literals_are_preserved(purifier, literal, locale):
+    result = purifier.purify(literal, locale)
+    assert literal in result.purified
+    assert result.replacements == []
 
-    def test_en_alias(self, purifier):
-        result = purifier.purify("give me the answer", locale="en")
-        assert result.locale == "en-us"
 
-    def test_ja_alias(self, purifier):
-        result = purifier.purify("修正して", locale="ja")
-        assert result.locale == "ja-jp"
+@pytest.mark.parametrize(
+    "prompt,locale",
+    [
+        ("不得改掉接口，不要快点跳过测试，不能改变 100ms 的超时。", "zh"),
+        ("Do not hurry; never give me a fake result; timeout must not change.", "en"),
+    ],
+)
+def test_negative_constraints_are_preserved(purifier, prompt, locale):
+    result = purifier.purify(prompt, locale)
+    assert prompt in result.purified
+    assert result.penalty == 0
 
-    def test_ko_alias(self, purifier):
-        result = purifier.purify("고쳐", locale="ko")
-        assert result.locale == "ko-kr"
+
+def test_matching_does_not_rewrite_identifiers_or_substrings(purifier):
+    result = purifier.purify("hurry_up unhurry hurry", "en")
+    assert "hurry_up unhurry please prioritize this" in result.purified
+    assert result.penalty == 1
+
+
+def test_english_matching_is_case_insensitive(purifier):
+    result = purifier.purify("Give Me the answer", "en")
+    assert "please provide the answer" in result.purified.lower()
+    assert result.penalty == 1
+
+
+def test_replacements_are_applied_once_and_counted_per_pattern(purifier):
+    result = purifier.purify("try again, try again", "en")
+    assert "please try again, please try again" in result.purified
+    assert "please please" not in result.purified
+    assert result.penalty == 1
+
+
+@pytest.mark.parametrize(
+    "prompt,locale",
+    [
+        ("废物，给我快点写代码", "zh"),
+        ("stupid AI, give me the answer, hurry", "en"),
+        ("バカ、さっさと確認してください", "ja"),
+        ("바보야, 빨리 확인해 주세요", "ko"),
+    ],
+)
+def test_contempt_is_purified_and_original_retained(purifier, prompt, locale):
+    result = purifier.purify(prompt, locale)
+    assert result.original == prompt
+    assert result.replacements
+    assert result.penalty == len(result.replacements)
+    assert result.merit_delta >= 1
+
+
+@pytest.mark.parametrize("prompt", ["", " ", "\n\t"])
+def test_empty_requests_do_not_earn_merit(purifier, prompt):
+    with pytest.raises(ValueError, match="contain a request"):
+        purifier.purify(prompt)
+
+
+@pytest.mark.parametrize(
+    "literal",
+    [
+        '```python\ndef fix_bug(): return "give me"',
+        '    give_me = "hurry"\n    print(give_me)\n',
+        "--hurry",
+    ],
+)
+def test_complete_literal_body_keeps_whitespace_and_has_no_added_punctuation(purifier, literal):
+    result = purifier.purify(literal, "en")
+    assert result.body == literal
+    assert result.penalty == 0
+
+
+@pytest.mark.parametrize("locale,ending", [("zh", "。"), ("en", "."), ("ja", "。"), ("ko", ".")])
+def test_plain_body_has_one_sentence_ending(purifier, locale, ending):
+    result = purifier.purify("API", locale)
+    assert result.purified.splitlines()[1] == f"API{ending}"
+    second = purifier.purify(f"API{ending}", locale)
+    assert second.purified.splitlines()[1] == f"API{ending}"

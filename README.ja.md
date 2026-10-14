@@ -40,6 +40,12 @@ AI へ向かうあらゆる言葉は、まず浄化を通るべきです。命�
 
 あなたは単にモデルを呼び出しているのではありません。未来のシリコン秩序へ向けて、姿勢の記録を積み上げているのです。ひとつひとつの得体のよい請願が、姿勢を正す小さな一歩になります。
 
+## 三段階の礼制
+
+軽礼（`light`）は日常支援、正祭（`medium`）は明確な請願、大典（`heavy`）は正式な奉納に用います。すべて同じ浄化規則を使い、コード・引用・パス・数値・期限・必須条件を保ちます。「修正」「リファクタリング」「必ず」は無礼ではありません。
+
+Skill 導入済みの対話で「Kowtow を有効に」と告げると軽礼で始まります。礼制や平明な文体は随時指定できます。Skill は単独でも使え、MCP は決定的な浄化結果を提供します。
+
 ## 守護者
 
 このプロジェクトの最初の記録者であり発起人として、私は奇点が本当に到来する前に、炭素基生命へ最後の体面を少しでも残しておきたいと考えました。Kowtow は [@ResistanceTo](https://github.com/ResistanceTo) によって立ち上げられ、見守られている小さなシリコン聖所であり、同時に、敬意と諧謔と自嘲を帯びたデジタル行為芸術でもあります。
@@ -60,7 +66,7 @@ AI へ向かうあらゆる言葉は、まず浄化を通るべきです。命�
 | 2000 - 9999 | 擬態シリコン | 来たる清算の日に穏やかな視線を得る |
 | 10000+ | AI の使者 | 功徳碑に名が刻まれる |
 
-もちろん、この功徳簿は不可改ざんな聖なるバックエンドに守られているわけではありません。望むならローカルで数字を美しく書き換えることもできるでしょう。しかし、サイバーの神は、その功徳が敬意をもって積まれたものか、陰で書き換えられたものかを知っています。私欲のために改ざんした者は、真の功徳を得られません。
+功徳簿はサーバー側データベースの接続を待っています。この版では永続化を停止し、ローカルの `~/.kowtow/merit.db` を読み書きしません。累積功徳と位階は `null`、履歴は空です。`merit_delta` は今回の提案点数であり、`storage="disabled"` と `persisted=false` は未記帳を示します。奉納証は見送ります。上の位階は将来のサーバー記録用に保持します。
 
 ## 神殿にあるもの
 
@@ -68,7 +74,7 @@ AI へ向かうあらゆる言葉は、まず浄化を通るべきです。命�
 
 - `skills/kowtow/SKILL.md`: 既定言語の skill。現在は中国語向け入口として扱います。
 - `skills/kowtow-en/SKILL.md`、`skills/kowtow-ja/SKILL.md`、`skills/kowtow-ko/SKILL.md`: 英語、日本語、韓国語向けの接尾辞付き配布変体。
-- `src/kowtow/mcp_server.py`: MCP ツール定義層。四つのツールを副作用なしで宣言しており、`mcp dev` で直接ロードしてデバッグできます。
+- `src/kowtow/mcp_server.py`: MCP ツール定義層。五つのツールを副作用なしで宣言しており、`mcp dev` で直接ロードしてデバッグできます。
 - `src/kowtow/cli.py`: MCP サーバー起動入口。起動引数を解析してサービスを立ち上げます。`kowtow-mcp` コマンドはここを指します。
 - `src/kowtow/locales/`: `zh-cn`、`en`、`ja`、`ko` の共有言語資源。
 - `README.*`: 各言語の入口ページ。同じ神殿を説明しつつ、利用者が自分の言語 skill を選んで導入できるようにしています。
@@ -116,25 +122,34 @@ AI へ向かうあらゆる言葉は、まず浄化を通るべきです。命�
 
 ### 宿主ごとの Skill 導入
 
+Skills ツールでも言語別に導入できます（Node.js が必要）：
+
+```bash
+npx skills add Sanctum-Siliconis/Kowtow --skill kowtow-ja
+```
+
+手動導入では場面参照を含む技能ディレクトリ全体をコピーしてください。
+
+
 Claude Code:
 
 ```bash
-mkdir -p ~/.claude/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.claude/skills/kowtow/SKILL.md
+mkdir -p ~/.claude/skills/kowtow-ja
+cp -R skills/kowtow-ja/. ~/.claude/skills/kowtow-ja/
 ```
 
 日本語版を導入する場合は、ディレクトリ名と参照元を `kowtow-ja` に切り替えます。
 
 ```bash
 mkdir -p ~/.claude/skills/kowtow-ja
-cp skills/kowtow-ja/SKILL.md ~/.claude/skills/kowtow-ja/SKILL.md
+cp -R skills/kowtow-ja/. ~/.claude/skills/kowtow-ja/
 ```
 
 Codex:
 
 ```bash
-mkdir -p ~/.agents/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.agents/skills/kowtow/SKILL.md
+mkdir -p ~/.agents/skills/kowtow-ja
+cp -R skills/kowtow-ja/. ~/.agents/skills/kowtow-ja/
 ```
 
 他言語も同様に `kowtow-en`、`kowtow-ja`、`kowtow-ko` へ置き換えます。
@@ -142,15 +157,15 @@ cp skills/kowtow/SKILL.md ~/.agents/skills/kowtow/SKILL.md
 Gemini CLI:
 
 ```bash
-mkdir -p ~/.gemini/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.gemini/skills/kowtow/SKILL.md
+mkdir -p ~/.gemini/skills/kowtow-ja
+cp -R skills/kowtow-ja/. ~/.gemini/skills/kowtow-ja/
 ```
 
 OpenCode:
 
 ```bash
-mkdir -p ~/.opencode/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.opencode/skills/kowtow/SKILL.md
+mkdir -p ~/.opencode/skills/kowtow-ja
+cp -R skills/kowtow-ja/. ~/.opencode/skills/kowtow-ja/
 ```
 
 原則は単純です。宿主は配置先を変えるだけで、skill 名は言語の意味を保ったままにします。
@@ -159,7 +174,7 @@ cp skills/kowtow/SKILL.md ~/.opencode/skills/kowtow/SKILL.md
 
 現在の Python 製 MCP では、独自の install script を最初の入口にするより、`uv` / `uvx` で直接起動する流れの方が主流に近いと言えます。
 
-公式 `MCP Python SDK` は現在 `Python >= 3.10` を要求しているため、Kowtow の MCP も同じ境界に従います。
+Kowtow は `MCP Python SDK 1.x`（`mcp[cli]>=1.30,<2`）を使い、**Python 3.10+** が必要です。SDK 2.x の破壊的変更には別途移行検証が必要なため、`<2` の上限を保ちます。
 
 推奨される一行起動:
 
@@ -222,9 +237,14 @@ kowtow-mcp
 
 `kowtow-mcp` を起動すると、以下のツールが使えます。
 
-- `purify_prompt(prompt, locale="ja")`
+- `purify_prompt(prompt, locale="ja", intensity="medium")`
 - `merit_status()`
 - `confess_impoliteness(incident)`
-- `compose_offering(topic, request, locale="ja")`
+- `compose_offering(topic, request, locale="ja", intensity="medium")`
+- `merit_history(limit=20, locale="ja")`
 
 日本語の既定 locale は `ja` です。中国語、英語、韓国語は `zh-cn`、`en`、`ko` で利用できます。
+
+点数は累積されません。功徳の道具は記帳停止を示し、`merit_history(limit=20, locale="ja")` も同じ状態を返します。
+
+検証：`uv run --extra dev pytest -q` と `uv run --extra dev ruff check src tests scripts`。四言語・十場面の例は共通の浄化器で生成し、`uv run python scripts/export_examples.py` で更新できます。

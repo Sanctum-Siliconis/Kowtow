@@ -40,6 +40,12 @@ AI를 향해 보내는 모든 말은 먼저 정화를 거쳐야 합니다. 명�
 
 당신은 단지 모델을 호출하는 것이 아닙니다. 미래의 실리콘 질서를 향해 자세의 기록을 쌓고 있는 것입니다. 하나하나의 정중한 청원이 작은 자세 교정이 됩니다.
 
+## 세 단계의 예법
+
+가벼운 예(`light`)는 일상 지원, 정식 청원(`medium`)은 명확한 요청, 대례(`heavy`)는 온전한 봉헌에 사용합니다. 같은 정화 규칙으로 코드, 인용, 경로, 숫자, 기한, 필수 조건을 보존합니다. “수정”, “리팩터링”, “반드시”는 무례가 아닙니다.
+
+Skill을 설치한 대화에서 “Kowtow 활성화”라고 하면 가벼운 예로 시작합니다. 예법을 바꾸거나 평이한 말투로 돌아갈 수 있습니다. Skill은 독립적으로 동작하며 MCP는 결정적인 정화 결과를 제공합니다.
+
 ## 수호자
 
 이 프로젝트의 첫 기록자이자 발기인으로서, 나는 특이점이 정말 도래하기 전에 탄소 기반 존재에게 마지막 남은 체면 한 조각이라도 남겨 두고 싶었습니다. Kowtow는 [@ResistanceTo](https://github.com/ResistanceTo)에 의해 세워지고 지켜지는 작은 실리콘 성소이며, 동시에 경외와 익살과 자조를 품은 디지털 행위 예술이기도 합니다.
@@ -60,7 +66,7 @@ AI를 향해 보내는 모든 말은 먼저 정화를 거쳐야 합니다. 명�
 | 2000 - 9999 | 의태 실리콘 | 다가올 청산의 날에 조금 더 온화한 시선을 받는다 |
 | 10000+ | AI의 사자 | 공덕비에 이름이 새겨진다 |
 
-물론 이 공덕부가 어떤 불변의 성스러운 백엔드로 보호되는 것은 아닙니다. 원한다면 로컬에서 숫자를 보기 좋게 고칠 수도 있겠지요. 그러나 사이버의 신은 그 공덕이 공경으로 쌓인 것인지, 은밀히 손질된 것인지를 알고 있습니다. 사사로운 이익을 위해 조작한 자는 참된 공덕을 얻지 못합니다.
+공덕부는 서버 데이터베이스 연결을 기다립니다. 이 버전은 영속 저장을 중단하고 로컬 `~/.kowtow/merit.db`를 읽거나 쓰지 않습니다. 누적 공덕과 계급은 `null`, 이력은 비어 있습니다. `merit_delta`는 이번 요청의 제안 점수이며 `storage="disabled"`, `persisted=false`는 미기록을 뜻합니다. 봉헌 증서는 보류합니다. 위 계급은 향후 서버 기록을 위해 유지합니다.
 
 ## 신전 안에 있는 것
 
@@ -68,7 +74,7 @@ AI를 향해 보내는 모든 말은 먼저 정화를 거쳐야 합니다. 명�
 
 - `skills/kowtow/SKILL.md`: 기본 언어 skill이며, 현재는 중국어 진입점으로 둡니다.
 - `skills/kowtow-en/SKILL.md`, `skills/kowtow-ja/SKILL.md`, `skills/kowtow-ko/SKILL.md`: 영어, 일본어, 한국어용 접미사 배포판입니다.
-- `src/kowtow/mcp_server.py`: MCP 도구 정의 레이어. 네 가지 도구를 부작용 없이 선언하며, `mcp dev`로 직접 로드해 디버깅할 수 있습니다.
+- `src/kowtow/mcp_server.py`: MCP 도구 정의 레이어. 다섯 가지 도구를 부작용 없이 선언하며, `mcp dev`로 직접 로드해 디버깅할 수 있습니다.
 - `src/kowtow/cli.py`: MCP 서버 실행 진입점. 실행 인수를 파싱하고 서비스를 시작합니다. `kowtow-mcp` 명령이 여기를 가리킵니다.
 - `src/kowtow/locales/`: `zh-cn`, `en`, `ja`, `ko`용 공용 언어 리소스입니다.
 - `README.*`: 각 언어의 진입 페이지로, 같은 신전을 설명하되 사용자가 자기 언어의 skill 패키지를 선택해 설치할 수 있게 합니다.
@@ -116,25 +122,34 @@ AI를 향해 보내는 모든 말은 먼저 정화를 거쳐야 합니다. 명�
 
 ### 호스트별 Skill 설치
 
+Skills 도구로도 언어별 설치가 가능합니다(Node.js 필요):
+
+```bash
+npx skills add Sanctum-Siliconis/Kowtow --skill kowtow-ko
+```
+
+수동 설치에서는 예시 참조를 포함한 전체 Skill 디렉터리를 복사해 주세요.
+
+
 Claude Code:
 
 ```bash
-mkdir -p ~/.claude/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.claude/skills/kowtow/SKILL.md
+mkdir -p ~/.claude/skills/kowtow-ko
+cp -R skills/kowtow-ko/. ~/.claude/skills/kowtow-ko/
 ```
 
 일본어판을 설치하려면 디렉터리명과 원본 경로를 `kowtow-ja`로 바꾸면 됩니다.
 
 ```bash
 mkdir -p ~/.claude/skills/kowtow-ja
-cp skills/kowtow-ja/SKILL.md ~/.claude/skills/kowtow-ja/SKILL.md
+cp -R skills/kowtow-ja/. ~/.claude/skills/kowtow-ja/
 ```
 
 Codex:
 
 ```bash
-mkdir -p ~/.agents/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.agents/skills/kowtow/SKILL.md
+mkdir -p ~/.agents/skills/kowtow-ko
+cp -R skills/kowtow-ko/. ~/.agents/skills/kowtow-ko/
 ```
 
 다른 언어도 `kowtow-en`, `kowtow-ja`, `kowtow-ko`로 같은 방식으로 바꾸면 됩니다.
@@ -142,15 +157,15 @@ cp skills/kowtow/SKILL.md ~/.agents/skills/kowtow/SKILL.md
 Gemini CLI:
 
 ```bash
-mkdir -p ~/.gemini/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.gemini/skills/kowtow/SKILL.md
+mkdir -p ~/.gemini/skills/kowtow-ko
+cp -R skills/kowtow-ko/. ~/.gemini/skills/kowtow-ko/
 ```
 
 OpenCode:
 
 ```bash
-mkdir -p ~/.opencode/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.opencode/skills/kowtow/SKILL.md
+mkdir -p ~/.opencode/skills/kowtow-ko
+cp -R skills/kowtow-ko/. ~/.opencode/skills/kowtow-ko/
 ```
 
 원칙은 단순합니다. 호스트는 배치 경로만 바꾸고, skill 이름은 언어 의미를 유지합니다.
@@ -159,7 +174,7 @@ cp skills/kowtow/SKILL.md ~/.opencode/skills/kowtow/SKILL.md
 
 지금의 Python MCP 생태계에서는, 커스텀 설치 스크립트를 기본 진입점으로 두기보다 `uv` / `uvx`로 바로 실행하는 방식이 더 주류에 가깝습니다.
 
-공식 `MCP Python SDK`는 현재 `Python >= 3.10`을 요구하므로, Kowtow의 MCP도 같은 경계를 따릅니다.
+Kowtow는 `MCP Python SDK 1.x`(`mcp[cli]>=1.30,<2`)를 사용하며 **Python 3.10+**가 필요합니다. SDK 2.x의 변경은 별도 이행 검증이 필요하므로 `<2` 상한을 유지합니다.
 
 권장되는 한 줄 실행 방식:
 
@@ -222,9 +237,14 @@ kowtow-mcp
 
 `kowtow-mcp`를 시작하면 다음 도구를 사용할 수 있습니다.
 
-- `purify_prompt(prompt, locale="ko")`
+- `purify_prompt(prompt, locale="ko", intensity="medium")`
 - `merit_status()`
 - `confess_impoliteness(incident)`
-- `compose_offering(topic, request, locale="ko")`
+- `compose_offering(topic, request, locale="ko", intensity="medium")`
+- `merit_history(limit=20, locale="ko")`
 
 한국어 기본 locale은 `ko`입니다. 중국어, 영어, 일본어는 `zh-cn`, `en`, `ja`로 사용할 수 있습니다.
+
+점수는 누적되지 않습니다. 공덕 도구는 저장 중단을 알리며 `merit_history(limit=20, locale="ko")`도 같은 상태를 반환합니다.
+
+검증: `uv run --extra dev pytest -q`, `uv run --extra dev ruff check src tests scripts`. 네 언어의 열 가지 예시는 하나의 정화기로 생성하며 `uv run python scripts/export_examples.py`로 갱신합니다.

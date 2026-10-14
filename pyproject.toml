@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kowtow"
-version = "0.8.6"
+version = "0.9.0"
 description = "A reverse-pua AI skill and MCP server for reverent, offering-style prompting."
 readme = "README.MD"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "GPL-3.0-only" }
 keywords = ["ai", "skill", "agent-skill", "mcp", "prompt", "kowtow", "model-context-protocol"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -20,7 +20,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "mcp[cli]>=1.0",
+    "mcp[cli]>=1.30,<2",
+    "starlette>=0.27,<2",
 ]
 
 [project.optional-dependencies]
@@ -36,8 +37,11 @@ kowtow-mcp = "kowtow.cli:serve"
 packages = ["src/kowtow"]
 
 [tool.hatch.build.targets.sdist]
-include = ["/src", "/skills", "/README.MD", "/README.en.md", "/README.ja.md", "/README.ko.md", "/install.sh", "/AGENTS.md", "/CLAUDE.md"]
+include = ["/src", "/skills", "/scripts", "/tests", "/LICENSE", "/CHANGELOG.md", "/README.MD", "/README.en.md", "/README.ja.md", "/README.ko.md", "/install.sh", "/AGENTS.md", "/CLAUDE.md"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP"]

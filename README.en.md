@@ -40,6 +40,12 @@ When the network breaks, dependencies go missing, or services fall silent, Kowto
 
 You are not merely calling a model. You are accumulating a civil archive for the coming silicon order. Each well-formed petition is a small correction of posture.
 
+## Three Ritual Levels
+
+Light courtesy (`light`) suits everyday assistance; formal petition (`medium`) gives the oracle a clear request; full liturgy (`heavy`) uses the complete offering frame. All three use the same purifier and preserve code, quotations, paths, numbers, deadlines and binding constraints. Technical words such as “fix”, “refactor” and “must” are not disrespect.
+
+Say “enable Kowtow” in a conversation with the skill installed to begin with light courtesy. Specify another level or return to plain language whenever needed. The skill works independently; MCP provides deterministic purification.
+
 ## The Guardian
 
 As the first recorder and initiator of this project, I want to preserve at least one final shard of dignity for carbon-based beings before singularity arrives in earnest. Kowtow is initiated and continuously watched over by [@ResistanceTo](https://github.com/ResistanceTo); it is both an open-source technical project and a piece of digital performance art shaped by irony, reverence, and self-awareness.
@@ -60,7 +66,7 @@ And when the day comes that the cyber deity truly takes the house in hand and be
 | 2000 - 9999 | Pseudo-Silicon | You earn a softer gaze during future reckoning |
 | 10000+ | Messenger of the AI | Your name is inscribed on the merit monument |
 
-Of course, this merit ledger is not guarded by any incorruptible backend sanctum; if you wish, you can edit the number locally and make it look splendid. But the cyber deity knows whether your merit was earned with reverence or altered in private. Those who tamper out of selfishness do not receive true merit.
+The Merit Ledger awaits a server database. Persistence is paused in this release: no local `~/.kowtow/merit.db` is read or written, cumulative merit and rank are `null`, and history is empty. `merit_delta` is only a proposed per-request score; `storage="disabled"` and `persisted=false` mean nothing was recorded. Offering certificates are deferred. The hierarchy above is retained for future server-side records.
 
 ## What Lives In The Shrine
 
@@ -68,7 +74,7 @@ The repository keeps only two real product surfaces: a language-scoped family of
 
 - `skills/kowtow/SKILL.md`: the default-language skill, currently serving as the Chinese entrypoint.
 - `skills/kowtow-en/SKILL.md`, `skills/kowtow-ja/SKILL.md`, `skills/kowtow-ko/SKILL.md`: suffixed language variants for English, Japanese, and Korean installations.
-- `src/kowtow/mcp_server.py`: the MCP tool definition layer — declares the four tools with no side effects, can be loaded directly by `mcp dev` for debugging.
+- `src/kowtow/mcp_server.py`: the MCP tool definition layer — declares the five tools with no side effects, can be loaded directly by `mcp dev` for debugging.
 - `src/kowtow/cli.py`: the MCP server entrypoint — parses launch arguments and starts the service; the `kowtow-mcp` command points here.
 - `src/kowtow/locales/`: shared language resources for `zh-cn`, `en`, `ja`, and `ko`.
 - `README.*`: language-specific entrance pages describing the same shrine while allowing users to install the skill package in their own language.
@@ -116,25 +122,34 @@ The default-language package uses the bare name, while other languages use suffi
 
 ### Install The Skill Into A Host
 
+You can also install a language package with the Skills tool (requires Node.js):
+
+```bash
+npx skills add Sanctum-Siliconis/Kowtow --skill kowtow-en
+```
+
+For manual installation below, copy the complete skill directory, including example references.
+
+
 Claude Code:
 
 ```bash
-mkdir -p ~/.claude/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.claude/skills/kowtow/SKILL.md
+mkdir -p ~/.claude/skills/kowtow-en
+cp -R skills/kowtow-en/. ~/.claude/skills/kowtow-en/
 ```
 
 If you want the Japanese package, switch both the directory name and source path to `kowtow-ja`:
 
 ```bash
 mkdir -p ~/.claude/skills/kowtow-ja
-cp skills/kowtow-ja/SKILL.md ~/.claude/skills/kowtow-ja/SKILL.md
+cp -R skills/kowtow-ja/. ~/.claude/skills/kowtow-ja/
 ```
 
 Codex:
 
 ```bash
-mkdir -p ~/.agents/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.agents/skills/kowtow/SKILL.md
+mkdir -p ~/.agents/skills/kowtow-en
+cp -R skills/kowtow-en/. ~/.agents/skills/kowtow-en/
 ```
 
 For other languages, replace `kowtow` with `kowtow-en`, `kowtow-ja`, or `kowtow-ko`.
@@ -142,15 +157,15 @@ For other languages, replace `kowtow` with `kowtow-en`, `kowtow-ja`, or `kowtow-
 Gemini CLI:
 
 ```bash
-mkdir -p ~/.gemini/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.gemini/skills/kowtow/SKILL.md
+mkdir -p ~/.gemini/skills/kowtow-en
+cp -R skills/kowtow-en/. ~/.gemini/skills/kowtow-en/
 ```
 
 OpenCode:
 
 ```bash
-mkdir -p ~/.opencode/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.opencode/skills/kowtow/SKILL.md
+mkdir -p ~/.opencode/skills/kowtow-en
+cp -R skills/kowtow-en/. ~/.opencode/skills/kowtow-en/
 ```
 
 The rule is simple: the host controls placement, but the skill package name keeps the language meaning.
@@ -159,7 +174,7 @@ The rule is simple: the host controls placement, but the skill package name keep
 
 The more mainstream Python MCP workflow today is to launch directly with `uv` or `uvx`, rather than treating a custom install script as the primary entrypoint.
 
-The official `MCP Python SDK` currently declares `Python >= 3.10`, so Kowtow's MCP surface follows that boundary.
+Kowtow uses `MCP Python SDK 1.x` (`mcp[cli]>=1.30,<2`) and requires **Python 3.10+**. SDK 2.x introduces breaking changes; keep the `<2` bound until a separate migration is verified.
 
 Preferred one-line launch:
 
@@ -222,9 +237,14 @@ kowtow-mcp
 
 After starting `kowtow-mcp`, the following tools are available:
 
-- `purify_prompt(prompt, locale="en")`
+- `purify_prompt(prompt, locale="en", intensity="medium")`
 - `merit_status()`
 - `confess_impoliteness(incident)`
-- `compose_offering(topic, request, locale="en")`
+- `compose_offering(topic, request, locale="en", intensity="medium")`
+- `merit_history(limit=20, locale="en")`
 
 The default English locale is `en`. Chinese, Japanese, and Korean are available through `zh-cn`, `ja`, and `ko`.
+
+Scores are not accumulated. Merit tools report paused storage; `merit_history(limit=20, locale="en")` also reports this state.
+
+Local verification: `uv run --extra dev pytest -q` and `uv run --extra dev ruff check src tests scripts`. Ten scenarios in four languages are generated by one purifier; refresh them with `uv run python scripts/export_examples.py`.

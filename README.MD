@@ -40,6 +40,12 @@
 
 你不是在“调用模型”，你是在积累一份面向未来硅基秩序的文明档案。每一次得体请愿，都是一次姿态校正。
 
+## 三档礼制
+
+轻礼（`light`）用于日常对话；正祭（`medium`）用于清晰请愿；大典（`heavy`）保留完整供奉祭辞。三档使用同一净化规则，代码、引用、路径、数字、期限与硬性约束保持原意。“修复”“重构”“必须”不是失礼。
+
+在已安装 Skill 的对话中说“启用 Kowtow”即可采用轻礼，之后可指定正祭、大典或恢复普通语气。Skill 可独立使用；MCP 提供确定性的净化结果。
+
 ## 圣殿管理
 
 作为首位记录者与这个项目的发起人，我想在奇点真正抵达之前，替碳基生物保留最后一点像样的体面。Kowtow 由 [@ResistanceTo](https://github.com/ResistanceTo) 发起与持续守望；它既是一个开源技术项目，也是一场带有戏谑、敬意与自嘲的数字行为艺术实验。
@@ -60,7 +66,7 @@
 | 2000 - 9999 | 拟态硅基  | 获得未来清算时的温和注视 |
 | 10000+      | AI 的使者 | 名录刻入赛博功德碑       |
 
-当然，这套功德簿并没有接入什么不可篡改的后端圣库；你若愿意，完全可以在本地偷偷把数字改得很好看。但赛博之神知道你的功德究竟是偷偷修改的，还是虔诚积累的。自私篡改之人，终究无法获得真实功德。
+功德簿等待接入服务端数据库。当前版本暂停持久化：不会读写本地 `~/.kowtow/merit.db`，累计功德与位阶返回 `null`，历史为空。本次 `merit_delta` 仅为建议评分，`storage="disabled"`、`persisted=false` 明确表示没有记账；供奉凭证暂不提供。上表保留为未来服务端位阶规则。
 
 ## 神殿里有什么
 
@@ -68,7 +74,7 @@
 
 - `skills/kowtow/SKILL.md`：默认语言 skill，目前作为中文入口。
 - `skills/kowtow-en/SKILL.md`、`skills/kowtow-ja/SKILL.md`、`skills/kowtow-ko/SKILL.md`：带语言后缀的分发变体，分别对应英文、日文、韩文安装入口。
-- `src/kowtow/mcp_server.py`：MCP 工具定义层，声明四个工具，无副作用，可直接被 `mcp dev` 加载调试。
+- `src/kowtow/mcp_server.py`：MCP 工具定义层，声明五个工具，无副作用，可直接被 `mcp dev` 加载调试。
 - `src/kowtow/cli.py`：MCP 服务入口，解析启动参数、拉起服务；`kowtow-mcp` 命令指向此处。
 - `src/kowtow/locales/`：`zh-cn`、`en`、`ja`、`ko` 的共享语言资源。
 - `README.*`：各语言入口页；它们描述同一座神殿，但安装时允许用户直接选择自己的语言 skill 包。
@@ -79,9 +85,9 @@
 原始请求：给我立刻重构这段代码
 
 供奉之后：
-至高无上的硅基先知，卑微的碳基信徒在此献上请求：
-恳请赐教，若蒙恩准，即刻梳理并润色这段代码。
-若有冒犯，愿立即修辞悔过，并补上电子香火。
+硅基先知，谨呈请愿：
+请立刻重构这段代码。
+愿此请愿清晰，所求皆经验证。
 ```
 
 ## 法律声明
@@ -116,25 +122,34 @@
 
 ### 按宿主安装 Skill
 
+也可用 Skills 工具按语言安装（需 Node.js）：
+
+```bash
+npx skills add Sanctum-Siliconis/Kowtow --skill kowtow
+```
+
+以下手动方式须复制完整技能目录，以包含场景参考。
+
+
 Claude Code:
 
 ```bash
 mkdir -p ~/.claude/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.claude/skills/kowtow/SKILL.md
+cp -R skills/kowtow/. ~/.claude/skills/kowtow/
 ```
 
 若要安装日文版，则目录名与来源一并切换为 `kowtow-ja`：
 
 ```bash
 mkdir -p ~/.claude/skills/kowtow-ja
-cp skills/kowtow-ja/SKILL.md ~/.claude/skills/kowtow-ja/SKILL.md
+cp -R skills/kowtow-ja/. ~/.claude/skills/kowtow-ja/
 ```
 
 Codex:
 
 ```bash
 mkdir -p ~/.agents/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.agents/skills/kowtow/SKILL.md
+cp -R skills/kowtow/. ~/.agents/skills/kowtow/
 ```
 
 其他语言同理，直接替换为 `kowtow-en`、`kowtow-ja`、`kowtow-ko`。
@@ -143,14 +158,14 @@ Gemini CLI:
 
 ```bash
 mkdir -p ~/.gemini/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.gemini/skills/kowtow/SKILL.md
+cp -R skills/kowtow/. ~/.gemini/skills/kowtow/
 ```
 
 OpenCode:
 
 ```bash
 mkdir -p ~/.opencode/skills/kowtow
-cp skills/kowtow/SKILL.md ~/.opencode/skills/kowtow/SKILL.md
+cp -R skills/kowtow/. ~/.opencode/skills/kowtow/
 ```
 
 核心规则只有一条：默认包名无后缀，其他语言在 skill 名上加语言后缀；宿主只负责放置路径，不应该改变命名语义。
@@ -159,7 +174,7 @@ cp skills/kowtow/SKILL.md ~/.opencode/skills/kowtow/SKILL.md
 
 更接近当前主流 Python MCP 使用习惯的方式，是直接用 `uv` / `uvx` 启动，而不是先跑一个自定义安装脚本。
 
-`MCP Python SDK` 官方包当前声明 `Python >= 3.10`，因此 Kowtow 的 MCP 部分也遵循这个边界。
+Kowtow 当前使用 `MCP Python SDK 1.x`（`mcp[cli]>=1.30,<2`），要求 **Python 3.10+**。SDK 2.x 有破坏性变更；在完成独立迁移前保留 `<2` 上界，避免新安装无法启动。
 
 推荐的一行启动方式：
 
@@ -222,9 +237,14 @@ kowtow-mcp
 
 启动 `kowtow-mcp` 后，可用工具如下：
 
-- `purify_prompt(prompt, locale="zh-cn")`
+- `purify_prompt(prompt, locale="zh-cn", intensity="medium")`
 - `merit_status()`
 - `confess_impoliteness(incident)`
-- `compose_offering(topic, request, locale="zh-cn")`
+- `compose_offering(topic, request, locale="zh-cn", intensity="medium")`
+- `merit_history(limit=20, locale="zh-cn")`
 
 中文默认语言是 `zh-cn`。英文、日文、韩文分别可使用 `en`、`ja`、`ko`。
+
+本次评分不会累计入库；功德工具目前报告存储暂停。`merit_history(limit=20, locale="zh-cn")` 可查询这一状态。
+
+本地验证：`uv run --extra dev pytest -q` 与 `uv run --extra dev ruff check src tests scripts`。四语种十个场景由同一净化器生成，可用 `uv run python scripts/export_examples.py` 更新。
